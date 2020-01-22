@@ -1,0 +1,54 @@
+menu "WIFI Server Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "myssid"
+        help
+            SSID (network name) for the example to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+            Can be left blank if the network has no security set.
+
+    config WIFI_IP
+        string "IP ADDRESS"
+        default "10.75.0.200"
+        help
+            IP ADDRESS.
+
+    config WIFI_NM
+        string "Netmask ADDRESS"
+        default "255.255.255.0"
+        help
+            Netmask ADDRESS.
+
+    config WIFI_GW
+        string "Gateway ADDRESS"
+        default "10.75.0.1"
+        help
+            Gateway ADDRESS.
+
+    choice IP_MODE
+        prompt "IP Version"
+        help
+            Example can use either IPV4 or IPV6.
+
+        config IPV4
+            bool "IPV4"
+
+        config IPV6
+            bool "IPV6"
+
+    endchoice
+
+    config LISTEN_PORT
+        int "Port"
+        range 0 65535
+        default 3333
+        help
+            Local port the example server will listen on.
+
+endmenu

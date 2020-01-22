@@ -9,6 +9,8 @@
 #include "lmic.h"
 #include "bmp280.h"
 
+#include "tcp_server.h"
+
 #define SDA_GPIO GPIO_NUM_21
 #define SCL_GPIO GPIO_NUM_22
 
@@ -44,7 +46,7 @@ void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
-static uint8_t msgData[40] = "Ciao!";
+//static uint8_t msgData[40] = "Ciao!";
 unsigned char mydata[] = "Ciao!";
 
 const unsigned TX_INTERVAL = CONFIG_LORA_TX_INTERVAL;
@@ -206,7 +208,8 @@ void bmp280_test(void *pvParamters)
         }
 
         printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
-	sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
+	sprintf((char*)msgData,"t:%.2f,p:%.2f,vb:%i,ve:%i,vp:%i",temperature,pressure,b,e,pa);
+	//sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
         if (bme280p)
             printf(", Humidity: %.2f\n", humidity);
         else
@@ -239,12 +242,18 @@ void LoraStart(void) {
 
   LMIC_setLinkCheckMode(0);
   LMIC.dn2Dr = DR_SF9;
-  //LMIC.datarate = DR_SF9;
+  LMIC.datarate = DR_SF7;
   LMIC_setDrTxpow(DR_SF7,14);
-  //LMIC.txChnl = 0;
+  LMIC.txChnl = 0;
   //LMIC_setDrTxpow(DR_SF7,14);
-
-  for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
+  int channel = 0;
+  for(int i = 0; i <= 8; i++) {
+    if (i != channel) { 
+	LMIC_disableChannel(i);
+	printf("Channel disabled: %i\n", i);
+	}
+    }
+	
   // Task Loop
     sendMessages(&sendjob);
     for (;;) {
@@ -257,7 +266,11 @@ void LoraStart(void) {
 }
 void app_main(void)
 {
+  ESP_ERROR_CHECK( nvs_flash_init() );
   os_init();
-  xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  initialise_wifi();  
+  wait_for_ip();
+
+  xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 5, NULL);
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }

@@ -85,8 +85,7 @@ config SCA_PIN
 config SCL_PIN 
     int "SCL GPIO PIN"
     default 22
-    help
+	    help
         SCL GPIO PIN.
-
 
 endmenu
