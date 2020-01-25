@@ -9,7 +9,7 @@
 #include "lmic.h"
 #include "bmp280.h"
 
-#include "tcp_server.h"
+#include "udp_server.h"
 
 #define SDA_GPIO GPIO_NUM_21
 #define SCL_GPIO GPIO_NUM_22
@@ -271,6 +271,6 @@ void app_main(void)
   initialise_wifi();  
   wait_for_ip();
 
-  xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 5, NULL);
+  xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
